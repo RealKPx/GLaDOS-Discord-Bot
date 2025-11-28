@@ -1,5 +1,5 @@
 import time
-import glados
+# import glados
 import discord
 import asyncio
 import subprocess
@@ -57,7 +57,7 @@ async def gladostts(ctx, arg):
     # tts.save_wav(audio, "SPEAKTEXT.wav")
     # time.sleep(1)
 
-    subprocess.run([r"\speak_console.exe", "-t" arg, "[-o SPEAKTEXT.wav]", "[-q]"])
+    subprocess.Popen([r"\speak_console.exe", "-t" arg, "[-o SPEAKTEXT.wav]", "[-q]"])
     time.sleep(1)
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
