@@ -8,7 +8,7 @@ from discord import FFmpegPCMAudio
 from discord.utils import get
 
 
-client = commands.Bot(command_prefix = ['-', 'GLaD '], intents = discord.Intents(messages=True))
+client = commands.Bot(command_prefix = ['-', 'GLaD '], intents = discord.Intents(message_content=True))
 TOKEN = open("gladostoken.txt","r").readline()
 
 @client.event
@@ -40,12 +40,10 @@ async def leave(ctx):
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
 
-async def  lyric(line, sleep, ctx):
-    async with ctx.typing():
-        await asyncio.sleep(sleep)
-    await ctx.send(line)
-    return
-
+@client.command()
+async def ping(ctx):
+    ctx.send("Pong")
+    
 @client.command()
 async def gladostts(ctx, arg):
     tts = glados.TTS()
@@ -70,14 +68,5 @@ async def gladostts(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio('SPEAKTEXT.mp3')
         player = voice.play(source)
-
-@client.command(pass_context=True)
-async def purge(ctx, amount=30):
-    channel = ctx.message.channel
-    messages = []
-    async for message in channel.history(limit=amount + 1):
-              messages.append(message)
-
-    await channel.delete_messages(messages)
 
 client.run(TOKEN)
