@@ -1,0 +1,83 @@
+import time
+import glados
+import discord
+import asyncio
+from discord.ext import commands,tasks
+from time import sleep
+from discord import FFmpegPCMAudio
+from discord.utils import get
+
+
+client = commands.Bot(command_prefix = ['-', 'GLaD '], intents = discord.Intents(messages=True))
+TOKEN = open("gladostoken.txt","r").readline()
+
+@client.event
+async def on_ready():
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
+
+@client.command()
+async def join(ctx):
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
+    if not ctx.author.voice:
+       return await ctx.send("Did you really think that would work if you weren't connected to a voice channel? Idiot...")
+    channel = ctx.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        await channel.connect()
+    client_channel = ctx.voice_client.channel
+    if channel and channel == client_channel:
+        if voice and voice.is_connected():
+            await ctx.send("I'm already in the voice channel with you.")
+
+@client.command()
+async def leave(ctx):
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
+    if not ctx.message.guild.voice_client:
+       return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
+    await ctx.voice_client.disconnect()
+
+async def  lyric(line, sleep, ctx):
+    async with ctx.typing():
+        await asyncio.sleep(sleep)
+    await ctx.send(line)
+    return
+
+@client.command()
+async def gladostts(ctx, arg):
+    tts = glados.TTS()
+    audio = tts.generate_speech_audio(arg)
+    time.sleep(1)
+    tts.save_wav(audio, "SPEAKTEXT.wav")
+    time.sleep(1)
+
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
+    if not ctx.author.voice:
+        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    channel = ctx.author.voice.channel
+    if not channel:
+        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if not voice:
+        await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
+    if voice and voice.is_playing():
+        return await ctx.send("Please wait until I am finished before using another voice channel command.")
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+        source = FFmpegPCMAudio('SPEAKTEXT.mp3')
+        player = voice.play(source)
+
+@client.command(pass_context=True)
+async def purge(ctx, amount=30):
+    channel = ctx.message.channel
+    messages = []
+    async for message in channel.history(limit=amount + 1):
+              messages.append(message)
+
+    await channel.delete_messages(messages)
+
+client.run(TOKEN)
