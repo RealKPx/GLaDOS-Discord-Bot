@@ -10,7 +10,7 @@ from discord.utils import get
 intents = discord.Intents.default()
 intents.messages = True
 
-client = commands.Bot(command_prefix = ['-', 'GLaD '], intents=intents)
+client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
 @client.event
@@ -44,7 +44,7 @@ async def leave(ctx):
 
 @client.command(name="ping")
 async def ping(ctx):
-    await print("pong")
+    print("pong")
     await ctx.send("Pong")
     
 @client.command(name="gladostts")
