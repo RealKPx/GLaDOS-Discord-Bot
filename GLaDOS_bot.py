@@ -7,7 +7,7 @@ from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.messages = True
 
 client = commands.Bot(command_prefix = '-', intents=intents)
