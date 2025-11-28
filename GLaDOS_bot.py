@@ -2,6 +2,7 @@ import time
 import glados
 import discord
 import asyncio
+import subprocess
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -9,6 +10,8 @@ from discord.utils import get
 
 intents = discord.Intents.all()
 intents.messages = True
+
+# tts = glados.TTS()
 
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
@@ -49,10 +52,12 @@ async def ping(ctx):
     
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
-    tts = glados.TTS()
-    audio = tts.generate_speech_audio(arg)
-    time.sleep(1)
-    tts.save_wav(audio, "SPEAKTEXT.wav")
+    # audio = tts.generate_speech_audio(arg)
+    # time.sleep(1)
+    # tts.save_wav(audio, "SPEAKTEXT.wav")
+    # time.sleep(1)
+
+    subprocess.run([r"\speak_console.exe", "-t" arg, "[-o SPEAKTEXT.wav]", "[-q]"])
     time.sleep(1)
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
