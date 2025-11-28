@@ -7,20 +7,22 @@ from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
+intents = discord.Intents.default()
+intents.messages = True
 
-client = commands.Bot(command_prefix = ['-', 'GLaD '], intents = discord.Intents(message_content=True))
+client = commands.Bot(command_prefix = ['-', 'GLaD '], intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
 
-@client.command()
+@client.command(name="join")
 async def join(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
     if not ctx.author.voice:
-       return await ctx.send("Did you really think that would work if you weren't connected to a voice channel? Idiot...")
+        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel? Idiot...")
     channel = ctx.author.voice.channel
     voice = get(client.voice_clients, guild=ctx.guild)
     if voice and voice.is_connected():
@@ -32,7 +34,7 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
 
-@client.command()
+@client.command(name="leave")
 async def leave(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
@@ -40,11 +42,12 @@ async def leave(ctx):
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
 
-@client.command()
+@client.command(name="ping")
 async def ping(ctx):
-    ctx.send("Pong")
+    await print("pong")
+    await ctx.send("Pong")
     
-@client.command()
+@client.command(name="gladostts")
 async def gladostts(ctx, arg):
     tts = glados.TTS()
     audio = tts.generate_speech_audio(arg)
