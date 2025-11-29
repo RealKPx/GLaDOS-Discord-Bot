@@ -3,7 +3,7 @@ import time
 import discord
 import asyncio
 import subprocess
-from pydub import AudioSegment
+import pydub
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -57,11 +57,12 @@ async def gladostts(ctx, arg):
     # time.sleep(1)
     # tts.save_wav(audio, "SPEAKTEXT.wav")
     # time.sleep(1)
-    texttospeak = "-t " + arg
-    Program = subprocess.run([r'speak.exe', texttospeak, "-o SPEAKTEXT.wav", "-q"])
+    texttospeak = "-t" + arg
+    Program = subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
     time.sleep(1)
 
-    AudioSegment.from_wav("SPEAKTEXT.wav").export("SPEAKTEXT.mp3", format="mp3")
+    sound = pydub.AudioSegment.from_wav("SPEAKTEXT.wav")
+    sound.export("SPEAKTEXT.mp3", format="mp3")
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
