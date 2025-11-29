@@ -1,9 +1,5 @@
-import time
-# import glados
 import discord
-import asyncio
 import subprocess
-import pydub
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -11,8 +7,6 @@ from discord.utils import get
 
 intents = discord.Intents.all()
 intents.messages = True
-
-# tts = glados.TTS()
 
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
@@ -53,16 +47,8 @@ async def ping(ctx):
     
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
-    # audio = tts.generate_speech_audio(arg)
-    # time.sleep(1)
-    # tts.save_wav(audio, "SPEAKTEXT.wav")
-    # time.sleep(1)
     texttospeak = "-t" + arg
     Program = subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
-    time.sleep(1)
-
-    sound = pydub.AudioSegment.from_wav("SPEAKTEXT.wav")
-    sound.export("SPEAKTEXT.mp3", format="mp3")
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
