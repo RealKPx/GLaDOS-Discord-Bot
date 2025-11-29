@@ -3,6 +3,7 @@ import time
 import discord
 import asyncio
 import subprocess
+from pydub import AudioSegment
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -56,9 +57,11 @@ async def gladostts(ctx, arg):
     # time.sleep(1)
     # tts.save_wav(audio, "SPEAKTEXT.wav")
     # time.sleep(1)
-
-    Program = subprocess.run([r'speak_console.exe',"-t", arg, "-o SPEAKTEXT.wav -q"])
+    texttospeak = "-t " + arg
+    Program = subprocess.run([r'speak.exe', texttospeak, "-o SPEAKTEXT.wav", "-q"])
     time.sleep(1)
+
+    AudioSegment.from_wav("SPEAKTEXT.wav").export("SPEAKTEXT.mp3", format="mp3")
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
@@ -74,7 +77,7 @@ async def gladostts(ctx, arg):
         return await ctx.send("Please wait until I am finished before using another voice channel command.")
     if voice and voice.is_connected():
         await voice.move_to(channel)
-        source = FFmpegPCMAudio('SPEAKTEXT.wav')
+        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
 
 client.run(TOKEN)
