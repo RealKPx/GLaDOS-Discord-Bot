@@ -57,7 +57,7 @@ async def gladostts(ctx, arg):
     # tts.save_wav(audio, "SPEAKTEXT.wav")
     # time.sleep(1)
 
-    subprocess.Popen([r"\speak_console.exe", "-t" arg, "[-o SPEAKTEXT.wav]", "[-q]"])
+    Program = subprocess.run([r'speak_console.exe',"-t", arg, "-o SPEAKTEXT.wav -q"])
     time.sleep(1)
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -74,7 +74,7 @@ async def gladostts(ctx, arg):
         return await ctx.send("Please wait until I am finished before using another voice channel command.")
     if voice and voice.is_connected():
         await voice.move_to(channel)
-        source = FFmpegPCMAudio('SPEAKTEXT.mp3')
+        source = FFmpegPCMAudio('SPEAKTEXT.wav')
         player = voice.play(source)
 
 client.run(TOKEN)
