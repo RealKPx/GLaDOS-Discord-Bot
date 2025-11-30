@@ -71,7 +71,8 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
     model = GPT4All("orca-mini-3b-gguf2-q4_0.gguf")
-    gptoutput = model.generate(arg, max_tokens=3)
+    pregpt = "You must speak as if you are GLaDOS. " + arg
+    gptoutput = model.generate(pregpt, max_tokens=3)
     print(gptoutput)
 
     texttospeak = "-t" + gptoutput
