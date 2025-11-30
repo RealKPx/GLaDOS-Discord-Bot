@@ -1,5 +1,6 @@
 import discord
 import subprocess
+from gpt4all import GPT4All
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -48,7 +49,33 @@ async def ping(ctx):
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
     texttospeak = "-t" + arg
-    Program = subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
+    subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
+
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
+    if not ctx.author.voice:
+        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    channel = ctx.author.voice.channel
+    if not channel:
+        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if not voice:
+        await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
+    if voice and voice.is_playing():
+        return await ctx.send("Please wait until I am finished before using another voice channel command.")
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
+        player = voice.play(source)
+
+@client.command(name="GLaDOS")
+async def GLaDOS(ctx, arg):
+    model = GPT4All("orca-mini-3b-gguf2-q4_0.gguf")
+    gptoutput = model.generate(arg, max_tokens=3)
+    print(gptoutput)
+
+    texttospeak = "-t" + gptoutput
+    subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
