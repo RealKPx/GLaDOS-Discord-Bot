@@ -12,6 +12,8 @@ intents.messages = True
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
+model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf", device="cpu")
+
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
@@ -70,10 +72,12 @@ async def gladostts(ctx, arg):
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    model = GPT4All("orca-mini-3b-gguf2-q4_0.gguf")
-    pregpt = "You must speak as if you are GLaDOS. " + arg
-    gptoutput = model.generate(pregpt, max_tokens=3)
-    print(gptoutput)
+    pregpt = "You must reply as if you are GLaDOS. " + arg
+    print(pregpt)
+    
+    with model.chat_session():
+        gptoutput = model.generate(pregpt, temp=100)
+        print(gptoutput)
 
     texttospeak = "-t" + gptoutput
     subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
