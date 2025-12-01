@@ -1,6 +1,7 @@
 import discord
 import subprocess
-from gpt4all import GPT4All
+from openai import OpenAI
+# from gpt4all import GPT4All
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -12,9 +13,13 @@ intents.messages = True
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
-model = GPT4All("mistral-7b-openorca.gguf2.Q4_0.gguf", device="cpu")
-downloadnewmodel = model.generate("Hello!")
-print(downloadnewmodel)
+# model = GPT4All("mistral-7b-openorca.gguf2.Q4_0.gguf", device="cpu")
+# downloadnewmodel = model.generate("Hello!")
+# print(downloadnewmodel)
+
+AI = OpenAI(
+    api_key=open("apikey.txt", "r").readline(),
+)
 
 @client.event
 async def on_ready():
@@ -74,14 +79,20 @@ async def gladostts(ctx, arg):
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
-    print(pregpt)
+    # pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
+    # print(pregpt)
     
-    with model.chat_session():
-        gptoutput = model.generate(pregpt, temp=50)
-        print(gptoutput)
+    # with model.chat_session():
+    #     gptoutput = model.generate(pregpt, temp=50)
+    #     print(gptoutput)
 
-    texttospeak = "-t" + gptoutput
+    response = AI.responses.create(
+        model="gpt-5.1",
+        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses.",
+        input=arg,
+    )
+
+    texttospeak = "-t" + response.output_text
     subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
