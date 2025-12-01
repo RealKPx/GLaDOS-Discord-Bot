@@ -74,7 +74,7 @@ async def gladostts(ctx, arg):
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You must swear in your responses. " + arg
+    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
     print(pregpt)
     
     with model.chat_session():
