@@ -1,6 +1,7 @@
 import discord
 import subprocess
 import os
+import time
 from openai import OpenAI
 # from gpt4all import GPT4All
 from discord.ext import commands,tasks
@@ -90,7 +91,7 @@ async def GLaDOS(ctx, arg):
 
     response = AI.responses.create(
         model="gpt-5.1",
-        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. Do not write any lists. Include a personal insult. ",
+        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. Do not write any lists. Include a personal insult. Keep responses to two lines. ",
         input=arg,
     )
 
@@ -113,5 +114,6 @@ async def GLaDOS(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
+        await ctx.send(response.output_text)
 
 client.run(TOKEN)
