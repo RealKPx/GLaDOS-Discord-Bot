@@ -12,7 +12,9 @@ intents.messages = True
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
-model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf", device="cpu")
+model = GPT4All("mistral-7b-openorca.gguf2.Q4_0.gguf", device="cpu")
+downloadnewmodel = model.generate("Hello!")
+print(downloadnewmodel)
 
 @client.event
 async def on_ready():
@@ -68,15 +70,15 @@ async def gladostts(ctx, arg):
     if voice and voice.is_connected():
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
-        player = voice.play(source)
+        player =  voice.play(source)
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    pregpt = "You must reply as if you are GLaDOS. " + arg
+    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You must swear in your responses. " + arg
     print(pregpt)
     
     with model.chat_session():
-        gptoutput = model.generate(pregpt, temp=100)
+        gptoutput = model.generate(pregpt, temp=50)
         print(gptoutput)
 
     texttospeak = "-t" + gptoutput
