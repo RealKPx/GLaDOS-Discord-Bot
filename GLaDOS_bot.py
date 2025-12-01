@@ -1,5 +1,6 @@
 import discord
 import subprocess
+import os
 from openai import OpenAI
 # from gpt4all import GPT4All
 from discord.ext import commands,tasks
@@ -49,6 +50,7 @@ async def leave(ctx):
     if not ctx.message.guild.voice_client:
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
+    os.remove("SPEAKTEXT.wav")
 
 @client.command(name="ping")
 async def ping(ctx):
@@ -88,7 +90,7 @@ async def GLaDOS(ctx, arg):
 
     response = AI.responses.create(
         model="gpt-5.1",
-        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses.",
+        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. Do not write any lists. Include a personal insult. ",
         input=arg,
     )
 
