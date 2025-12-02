@@ -7,20 +7,32 @@ from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
+#############################################################################
+# DISCORD INTEGRATION
+#############################################################################
 intents = discord.Intents.all()
 intents.messages = True
 
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
+#############################################################################
+# OPENAI INTEGRATION
+#############################################################################
 AI = OpenAI(
     api_key=open("apikey.txt", "r").readline(),
 )
 
+#############################################################################
+# EVENT - STARTUP
+#############################################################################
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
 
+#############################################################################
+# EVENT - JOIN COMMAND
+#############################################################################
 @client.command(name="join")
 async def join(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -38,6 +50,9 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
 
+#############################################################################
+# EVENT - LEAVE COMMAND
+#############################################################################
 @client.command(name="leave")
 async def leave(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -47,11 +62,17 @@ async def leave(ctx):
     await ctx.voice_client.disconnect()
     os.remove("SPEAKTEXT.wav")
 
+#############################################################################
+# EVENT - PING COMMAND
+#############################################################################
 @client.command(name="ping")
 async def ping(ctx):
     print("pong")
     await ctx.send("Pong")
-    
+
+#############################################################################
+# EVENT - TTS COMMAND
+#############################################################################
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
     texttospeak = "-t" + arg
@@ -74,6 +95,9 @@ async def gladostts(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player =  voice.play(source)
 
+#############################################################################
+# EVENT - GLaDOS COMMAND
+#############################################################################
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
@@ -104,4 +128,7 @@ async def GLaDOS(ctx, arg):
         player = voice.play(source)
         await ctx.send(response.output_text)
 
+#############################################################################
+# RUN BOT
+#############################################################################
 client.run(TOKEN)
