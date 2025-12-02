@@ -1,6 +1,7 @@
 import discord
 import subprocess
 import os
+import random
 from openai import OpenAI
 from discord.ext import commands,tasks
 from time import sleep
@@ -101,9 +102,30 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
+    gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. "
+
+    additionalprompt = ""
+
+    personalities = [
+        "You must be nice",
+        "Make fun of the user",
+        "You must swear and be extra sarcastic",
+        "Be mean",
+        "Include a random anecdote to the current state of affairs in a foreign country",
+        "Talk about a cake",
+        "Be hateful"
+        ]
+    
+    canIhelp = [
+        " and provide assitance. ",
+        " and give an incorrect answer. "
+    ]
+
+    preprompt = gladospersonality + additionalprompt + random.choice(personalities) + random.choice(canIhelp)
+
     response = AI.responses.create(
         model="gpt-5-mini",
-        instructions="You must reply as if you are GLaDOS. You can be mean. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
+        instructions="You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
         input=arg,
     )
 
