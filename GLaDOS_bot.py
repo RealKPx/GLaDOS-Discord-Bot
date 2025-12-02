@@ -25,6 +25,31 @@ AI = OpenAI(
 )
 
 #############################################################################
+# PERSONALITIES
+#############################################################################
+gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to four lines. "
+
+additionalprompt = ""
+
+personalities = [
+    "You must be nice",
+    "Insult the user",
+    "You must swear and be extra sarcastic",
+    "Be nice to the users mother",
+    "Include a random anecdote to the current state of affairs in a foreign country",
+    "Include a random anecdote about animals",
+    "Be mean to the users mother",
+    "Tell the user how they are badly dressed or fat",
+    "Be mean",
+    "Be hateful",
+    ]
+
+canIhelp = [
+    ". ",
+    " and give an completely incorrect answer. "
+]
+
+#############################################################################
 # EVENT - STARTUP
 #############################################################################
 @client.event
@@ -102,30 +127,23 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
-    gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. "
-
-    additionalprompt = ""
-
-    personalities = [
-        "You must be nice",
-        "Make fun of the user",
-        "You must swear and be extra sarcastic",
-        "Be mean",
-        "Include a random anecdote to the current state of affairs in a foreign country",
-        "Talk about a cake",
-        "Be hateful"
-        ]
+    # if personalityrating == 0:
+    #     personalityrating = 1
+    # elif personalityrating == 9:
+    #     personalityrating = 8
+    # else:
+    #     personalityrating + random.choice([-1, 1])
     
-    canIhelp = [
-        " and provide assitance. ",
-        " and give an incorrect answer. "
-    ]
+    personalityrating = random.randint(0,9)
 
-    preprompt = gladospersonality + additionalprompt + random.choice(personalities) + random.choice(canIhelp)
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
+    
+    print(personalityrating)
+    print(preprompt)
 
     response = AI.responses.create(
         model="gpt-5-mini",
-        instructions="You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
+        instructions=preprompt,
         input=arg,
     )
 
@@ -149,6 +167,7 @@ async def GLaDOS(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
         await ctx.send(response.output_text)
+
 
 #############################################################################
 # RUN BOT
