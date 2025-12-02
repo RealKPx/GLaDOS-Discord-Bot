@@ -3,10 +3,11 @@ import subprocess
 import os
 import asyncio
 from openai import OpenAI
-from discord.ext import commands,tasks
+from discord.ext import commands
+from discord.utils import get
 from time import sleep
 from discord import FFmpegPCMAudio
-from discord.utils import get
+from dotenv import load_dotenv
 
 ###############################################################
 # DISCORD INTEGRATION
@@ -26,42 +27,42 @@ AI = OpenAI(
     api_key=open("apikey.txt", "r").readline(),
 )
 
+load_dotenv()
+
 ###############################################################
 # AUDIO SINK – receives PCM audio packets from Discord users
 ###############################################################
-class VoiceReceiver(discord.sinks.RawDataSink):
-    def __init__(self, wake_callback):
-        super().__init__()
-        self.buffer = b""
-        self.wake_callback = wake_callback
+class MyAudioReceiver(discord.AudioSink):
+    def __init__(self):
+        self.buffers = {}
 
-    def raw_data(self, user, data):
-        # data is PCM 48kHz 16-bit stereo
-        self.buffer += data
-
-    async def cleanup(self):
-        # Fired when sink stops
-        pass
+    def write(self, data):
+        pcm = data.pcm
+        if pcm is None:
+            return
+        user = data.user
+        if user not in self.buffers:
+            self.buffers[user] = b""
+        self.buffers[user] += pcm
 
 ###############################################################
 # SPEECH-TO-TEXT (OpenAI Whisper)
 ###############################################################
 async def transcribe_audio(pcm_bytes: bytes) -> str:
-    """Send audio to OpenAI Whisper for STT."""
-    with open("temp.pcm", "wb") as f:
+    if len(pcm_bytes) < 2000:
+        return ""
+    temp_file = "temp_audio.pcm"
+    with open(temp_file, "wb") as f:
         f.write(pcm_bytes)
 
-    audio_file = open("temp.pcm", "rb")
-
-    result = AI.audio.transcriptions.create(
-        file=audio_file,
-        model="gpt-4o-mini-tts",
-        format="text",
-        # pcm requires parameters
-        options={"sample_rate": 48000, "channels": 2}
-    )
-
-    return result
+    with open(temp_file, "rb") as f:
+        result = AI.audio.transcriptions.create(
+            file=f,
+            model="gpt-4o-mini-tts",
+            format="text",
+            options={"sample_rate": 48000, "channels": 2}
+        )
+    return result.strip()
 
 ###############################################################
 # EVENTS - Startup
@@ -90,7 +91,7 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
     
-    await start_listening(voice, ctx)
+    asyncio.create_task(voice_listener(voice, ctx))
 
 ###############################################################
 # EVENTS - Leave
@@ -140,38 +141,34 @@ async def gladostts(ctx, arg):
 ###############################################################
 # EVENTS - LISTENING LOOP
 ###############################################################
-async def start_listening(vc: discord.VoiceClient, ctx):
-    while True:
-        sink = VoiceReceiver(wake_callback=None)
-        vc.start_recording(
-            sink,
-            finished_callback=lambda *args: None
-        )
+async def voice_listener(vc: discord.VoiceClient, ctx):
+    receiver = MyAudioReceiver()
+    vc.listen(receiver)
 
+    await ctx.send("Listening for **'hey luna'**… 🎤")
+
+    while vc.is_connected():
         await asyncio.sleep(3)
-        vc.stop_recording()
 
-        pcm_data = sink.buffer
-
-        if len(pcm_data) < 20000:  
-            continue  # ignore silence
-
-        # Transcribe audio
-        text = await transcribe_audio(pcm_data)
-        if not text:
-            continue
-
-        print("Heard:", text)
-
-        # Wake-word detection
-        if text.lower().startswith(WAKE_WORD):
-            query = text[len(WAKE_WORD):].strip()
-            if not query:
-                await ctx.send("Yes? I'm listening.")
+        for user, pcm in receiver.buffers.items():
+            if len(pcm) < 8000:
                 continue
 
-            await ctx.send("🎤 Heard you. Thinking...")
-            reply = await GLaDOS(ctx, query)
+            try:
+                text = await transcribe_audio(pcm)
+                print(f"[{user}] said:", text)
+                if text.lower().startswith(WAKE_WORD):
+                    query = text[len(WAKE_WORD):].strip()
+                    if not query:
+                        await ctx.send("Yes? I'm listening.")
+                        continue
+                    await ctx.send("✨ Thinking…")
+                    reply = await GLaDOS(ctx, query)
+                    await ctx.send(reply)
+            except Exception as e:
+                print("Error processing audio:", e)
+
+        receiver.buffers = {}
 
 ###############################################################
 # EVENTS - GLaDOS AI command
