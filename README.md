@@ -1,7 +1,7 @@
 # Steps to completion
 - [x] GLaDOS Text to speech
 - [x] Input -> LLM -> Output GLaDOS-like text -> input into GLaDOS TTS -> Discord (Uses GPT API, GPT-5-mini)  
-- [ ] Have randomised pre-prompts for more / less sass  
+- [x] Have randomised pre-prompts for more / less sass  
 - [ ] Listen from GLaDOS bot  
 - [ ] GLaDOS bot listen on queue (like an alexa)  
 - [ ] Speech to text -> into LLM -> GLaDOS output -> Spoken back via GLaDOS tts in discord  
