@@ -53,7 +53,7 @@ async def transcribe_audio(pcm_bytes: bytes) -> str:
 
     audio_file = open("temp.pcm", "rb")
 
-    result = client_ai.audio.transcriptions.create(
+    result = AI.audio.transcriptions.create(
         file=audio_file,
         model="gpt-4o-mini-tts",
         format="text",
@@ -90,7 +90,7 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
     
-    await start_listening(vc, ctx.channel)
+    await start_listening(voice, ctx)
 
 ###############################################################
 # EVENTS - Leave
@@ -138,6 +138,42 @@ async def gladostts(ctx, arg):
         player =  voice.play(source)
 
 ###############################################################
+# EVENTS - LISTENING LOOP
+###############################################################
+async def start_listening(vc: discord.VoiceClient, ctx):
+    while True:
+        sink = VoiceReceiver(wake_callback=None)
+        vc.start_recording(
+            sink,
+            finished_callback=lambda *args: None
+        )
+
+        await asyncio.sleep(3)
+        vc.stop_recording()
+
+        pcm_data = sink.buffer
+
+        if len(pcm_data) < 20000:  
+            continue  # ignore silence
+
+        # Transcribe audio
+        text = await transcribe_audio(pcm_data)
+        if not text:
+            continue
+
+        print("Heard:", text)
+
+        # Wake-word detection
+        if text.lower().startswith(WAKE_WORD):
+            query = text[len(WAKE_WORD):].strip()
+            if not query:
+                await ctx.send("Yes? I'm listening.")
+                continue
+
+            await ctx.send("🎤 Heard you. Thinking...")
+            reply = await GLaDOS(ctx, query)
+
+###############################################################
 # EVENTS - GLaDOS AI command
 ###############################################################
 @client.command(name="GLaDOS")
@@ -169,43 +205,6 @@ async def GLaDOS(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
         await ctx.send(response.output_text)
-
-###############################################################
-# LISTENING LOOP
-###############################################################
-async def start_listening(vc: discord.VoiceClient, text_channel):
-    while True:
-        sink = VoiceReceiver(wake_callback=None)
-        vc.start_recording(
-            sink,
-            finished_callback=lambda *args: None
-        )
-
-        await asyncio.sleep(3)
-        vc.stop_recording()
-
-        pcm_data = sink.buffer
-
-        if len(pcm_data) < 20000:  
-            continue  # ignore silence
-
-        # Transcribe audio
-        text = await transcribe_audio(pcm_data)
-        if not text:
-            continue
-
-        print("Heard:", text)
-
-        # Wake-word detection
-        if text.lower().startswith(WAKE_WORD):
-            query = text[len(WAKE_WORD):].strip()
-            if not query:
-                await text_channel.send("Yes? I'm listening.")
-                continue
-
-            await text_channel.send("🎤 Heard you. Thinking...")
-            reply = await ask_ai(query)
-            await text_channel.send(reply)
 
 ###############################################################
 # RUN BOT
