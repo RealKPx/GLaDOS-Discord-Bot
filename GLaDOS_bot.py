@@ -1,6 +1,7 @@
 import discord
 import subprocess
 import os
+import asyncio
 from openai import OpenAI
 from discord.ext import commands,tasks
 from time import sleep
@@ -10,7 +11,6 @@ from discord.utils import get
 ###############################################################
 # DISCORD INTEGRATION
 ###############################################################
-
 intents = discord.Intents.all()
 intents.messages = True
 
@@ -22,7 +22,6 @@ WAKE_WORD = "hey luna"
 ###############################################################
 # AI INTEGRATION
 ###############################################################
-
 AI = OpenAI(
     api_key=open("apikey.txt", "r").readline(),
 )
@@ -30,7 +29,6 @@ AI = OpenAI(
 ###############################################################
 # AUDIO SINK – receives PCM audio packets from Discord users
 ###############################################################
-
 class VoiceReceiver(discord.sinks.RawDataSink):
     def __init__(self, wake_callback):
         super().__init__()
@@ -68,7 +66,6 @@ async def transcribe_audio(pcm_bytes: bytes) -> str:
 ###############################################################
 # EVENTS - Startup
 ###############################################################
-
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
@@ -76,7 +73,6 @@ async def on_ready():
 ###############################################################
 # EVENTS - Join
 ###############################################################
-
 @client.command(name="join")
 async def join(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -93,11 +89,12 @@ async def join(ctx):
     if channel and channel == client_channel:
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
+    
+    await start_listening(vc, ctx.channel)
 
 ###############################################################
 # EVENTS - Leave
 ###############################################################
-
 @client.command(name="leave")
 async def leave(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -110,7 +107,6 @@ async def leave(ctx):
 ###############################################################
 # EVENTS - Ping
 ###############################################################
-
 @client.command(name="ping")
 async def ping(ctx):
     print("pong")
@@ -119,7 +115,6 @@ async def ping(ctx):
 ###############################################################
 # EVENTS - TTS Command
 ###############################################################
-    
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
     texttospeak = "-t" + arg
@@ -145,7 +140,6 @@ async def gladostts(ctx, arg):
 ###############################################################
 # EVENTS - GLaDOS AI command
 ###############################################################
-
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
@@ -177,7 +171,43 @@ async def GLaDOS(ctx, arg):
         await ctx.send(response.output_text)
 
 ###############################################################
+# LISTENING LOOP
+###############################################################
+async def start_listening(vc: discord.VoiceClient, text_channel):
+    while True:
+        sink = VoiceReceiver(wake_callback=None)
+        vc.start_recording(
+            sink,
+            finished_callback=lambda *args: None
+        )
+
+        await asyncio.sleep(3)
+        vc.stop_recording()
+
+        pcm_data = sink.buffer
+
+        if len(pcm_data) < 20000:  
+            continue  # ignore silence
+
+        # Transcribe audio
+        text = await transcribe_audio(pcm_data)
+        if not text:
+            continue
+
+        print("Heard:", text)
+
+        # Wake-word detection
+        if text.lower().startswith(WAKE_WORD):
+            query = text[len(WAKE_WORD):].strip()
+            if not query:
+                await text_channel.send("Yes? I'm listening.")
+                continue
+
+            await text_channel.send("🎤 Heard you. Thinking...")
+            reply = await ask_ai(query)
+            await text_channel.send(reply)
+
+###############################################################
 # RUN BOT
 ###############################################################
-
 client.run(TOKEN)
