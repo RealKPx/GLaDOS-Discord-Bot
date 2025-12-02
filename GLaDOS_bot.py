@@ -1,6 +1,7 @@
 import discord
 import subprocess
-from gpt4all import GPT4All
+import os
+from openai import OpenAI
 from discord.ext import commands,tasks
 from time import sleep
 from discord import FFmpegPCMAudio
@@ -12,9 +13,9 @@ intents.messages = True
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
-model = GPT4All("mistral-7b-openorca.gguf2.Q4_0.gguf", device="cpu")
-downloadnewmodel = model.generate("Hello!")
-print(downloadnewmodel)
+AI = OpenAI(
+    api_key=open("apikey.txt", "r").readline(),
+)
 
 @client.event
 async def on_ready():
@@ -44,6 +45,7 @@ async def leave(ctx):
     if not ctx.message.guild.voice_client:
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
+    os.remove("SPEAKTEXT.wav")
 
 @client.command(name="ping")
 async def ping(ctx):
@@ -74,14 +76,14 @@ async def gladostts(ctx, arg):
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
-    print(pregpt)
-    
-    with model.chat_session():
-        gptoutput = model.generate(pregpt, temp=50)
-        print(gptoutput)
 
-    texttospeak = "-t" + gptoutput
+    response = AI.responses.create(
+        model="gpt-5-mini",
+        instructions="You must reply as if you are GLaDOS. You can be mean. You must use dark humour. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
+        input=arg,
+    )
+
+    texttospeak = "-t" + response.output_text
     subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -100,5 +102,6 @@ async def GLaDOS(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
+        await ctx.send(response.output_text)
 
 client.run(TOKEN)
