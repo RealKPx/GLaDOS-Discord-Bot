@@ -1,6 +1,6 @@
 # Steps to completion
 - [x] GLaDOS Text to speech
-- [x] Input -> LLM -> Output GLaDOS-like text -> input into GLaDOS TTS -> Discord (from API or local)  
+- [x] Input -> LLM -> Output GLaDOS-like text -> input into GLaDOS TTS -> Discord (Uses GPT API, GPT-5-mini)  
 - [ ] Listen from GLaDOS bot  
 - [ ] GLaDOS bot listen on queue (like an alexa)  
 - [ ] Speech to text -> into LLM -> GLaDOS output -> Spoken back via GLaDOS tts in discord  
