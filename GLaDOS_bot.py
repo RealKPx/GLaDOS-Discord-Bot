@@ -32,11 +32,12 @@ load_dotenv()
 ###############################################################
 # AUDIO SINK – receives PCM audio packets from Discord users
 ###############################################################
-class MyAudioReceiver(discord.AudioSink):
+class VoiceReceiver:
     def __init__(self):
-        self.buffers = {}
+        self.buffers = {}  # user -> PCM bytes
 
     def write(self, data):
+        """Called by Py-Cord for each audio frame."""
         pcm = data.pcm
         if pcm is None:
             return
@@ -49,6 +50,7 @@ class MyAudioReceiver(discord.AudioSink):
 # SPEECH-TO-TEXT (OpenAI Whisper)
 ###############################################################
 async def transcribe_audio(pcm_bytes: bytes) -> str:
+    """Send PCM bytes to OpenAI Whisper."""
     if len(pcm_bytes) < 2000:
         return ""
     temp_file = "temp_audio.pcm"
@@ -86,12 +88,16 @@ async def join(ctx):
         await voice.move_to(channel)
     else:
         await channel.connect()
+        channel = ctx.author.voice.channel
+        vc = await channel.connect()
+        receiver = VoiceReceiver()
+        vc.listen(receiver)
+        await ctx.send("🎧 Luna is now listening for your voice...")
+        asyncio.create_task(voice_loop(voice, receiver, ctx))
     client_channel = ctx.voice_client.channel
     if channel and channel == client_channel:
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
-    
-    asyncio.create_task(voice_listener(voice, ctx))
 
 ###############################################################
 # EVENTS - Leave
@@ -141,10 +147,7 @@ async def gladostts(ctx, arg):
 ###############################################################
 # EVENTS - LISTENING LOOP
 ###############################################################
-async def voice_listener(vc: discord.VoiceClient, ctx):
-    receiver = MyAudioReceiver()
-    vc.listen(receiver)
-
+async def voice_loop(vc: discord.VoiceClient, receiver: VoiceReceiver, ctx):
     await ctx.send("Listening for **'hey luna'**… 🎤")
 
     while vc.is_connected():
@@ -152,23 +155,28 @@ async def voice_listener(vc: discord.VoiceClient, ctx):
 
         for user, pcm in receiver.buffers.items():
             if len(pcm) < 8000:
-                continue
+                continue  # ignore short/silent audio
 
             try:
                 text = await transcribe_audio(pcm)
-                print(f"[{user}] said:", text)
+                if not text:
+                    continue
+                print(f"[{user}] said: {text}")
+
+                # Wake-word detection
                 if text.lower().startswith(WAKE_WORD):
                     query = text[len(WAKE_WORD):].strip()
                     if not query:
                         await ctx.send("Yes? I'm listening.")
                         continue
                     await ctx.send("✨ Thinking…")
-                    reply = await GLaDOS(ctx, query)
-                    await ctx.send(reply)
+                    reply = await GLaDOS(query)
             except Exception as e:
-                print("Error processing audio:", e)
+                print(f"Error processing audio: {e}")
 
+        # Clear buffers
         receiver.buffers = {}
+
 
 ###############################################################
 # EVENTS - GLaDOS AI command
