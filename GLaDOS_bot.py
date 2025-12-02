@@ -103,7 +103,7 @@ async def GLaDOS(ctx, arg):
 
     response = AI.responses.create(
         model="gpt-5-mini",
-        instructions="You must reply as if you are GLaDOS. You can be mean. You must use dark humour. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
+        instructions="You must reply as if you are GLaDOS. You can be mean. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
         input=arg,
     )
 
