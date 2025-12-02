@@ -90,8 +90,9 @@ async def GLaDOS(ctx, arg):
     #     print(gptoutput)
 
     response = AI.responses.create(
-        model="gpt-5.1",
-        instructions="You must reply as if you are GLaDOS. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. Do not write any lists. Include a personal insult. Keep responses to two lines. ",
+        # model="gpt-5.1",
+        model="gpt-5-mini",
+        instructions="You must reply as if you are GLaDOS. You can be mean. You must use dark humour. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. ",
         input=arg,
     )
 
