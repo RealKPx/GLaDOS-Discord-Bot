@@ -7,19 +7,75 @@ from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
+###############################################################
+# DISCORD INTEGRATION
+###############################################################
+
 intents = discord.Intents.all()
 intents.messages = True
 
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
+WAKE_WORD = "hey luna"
+
+###############################################################
+# AI INTEGRATION
+###############################################################
+
 AI = OpenAI(
     api_key=open("apikey.txt", "r").readline(),
 )
 
+###############################################################
+# AUDIO SINK – receives PCM audio packets from Discord users
+###############################################################
+
+class VoiceReceiver(discord.sinks.RawDataSink):
+    def __init__(self, wake_callback):
+        super().__init__()
+        self.buffer = b""
+        self.wake_callback = wake_callback
+
+    def raw_data(self, user, data):
+        # data is PCM 48kHz 16-bit stereo
+        self.buffer += data
+
+    async def cleanup(self):
+        # Fired when sink stops
+        pass
+
+###############################################################
+# SPEECH-TO-TEXT (OpenAI Whisper)
+###############################################################
+async def transcribe_audio(pcm_bytes: bytes) -> str:
+    """Send audio to OpenAI Whisper for STT."""
+    with open("temp.pcm", "wb") as f:
+        f.write(pcm_bytes)
+
+    audio_file = open("temp.pcm", "rb")
+
+    result = client_ai.audio.transcriptions.create(
+        file=audio_file,
+        model="gpt-4o-mini-tts",
+        format="text",
+        # pcm requires parameters
+        options={"sample_rate": 48000, "channels": 2}
+    )
+
+    return result
+
+###############################################################
+# EVENTS - Startup
+###############################################################
+
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
+
+###############################################################
+# EVENTS - Join
+###############################################################
 
 @client.command(name="join")
 async def join(ctx):
@@ -38,6 +94,10 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
 
+###############################################################
+# EVENTS - Leave
+###############################################################
+
 @client.command(name="leave")
 async def leave(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -47,10 +107,18 @@ async def leave(ctx):
     await ctx.voice_client.disconnect()
     os.remove("SPEAKTEXT.wav")
 
+###############################################################
+# EVENTS - Ping
+###############################################################
+
 @client.command(name="ping")
 async def ping(ctx):
     print("pong")
     await ctx.send("Pong")
+
+###############################################################
+# EVENTS - TTS Command
+###############################################################
     
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
@@ -73,6 +141,10 @@ async def gladostts(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player =  voice.play(source)
+
+###############################################################
+# EVENTS - GLaDOS AI command
+###############################################################
 
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
@@ -103,5 +175,9 @@ async def GLaDOS(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
         await ctx.send(response.output_text)
+
+###############################################################
+# RUN BOT
+###############################################################
 
 client.run(TOKEN)
