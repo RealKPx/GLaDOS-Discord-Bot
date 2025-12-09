@@ -31,14 +31,14 @@ gladospersonality = "You must reply as if you are GLaDOS. You must use dark humo
 additionalprompt = ""
 
 personalities = [
-    "You must be angry",
-    "Insult the user",
-    "You must swear and be extra sarcastic",
-    "Include a random anecdote to the current state of affairs in a foreign country",
-    "Include a random anecdote about animals",
-    "Tell the user how they are badly dressed or fat",
-    "Be mean",
-    "Be hateful",
+    "You must be angry. ",
+    "Insult the user. ",
+    "You must swear and be extra sarcastic. ",
+    "Include a random anecdote to the current state of affairs in a foreign country. ",
+    "Include a random anecdote about animals. ",
+    "Tell the user how they are badly dressed or fat. ",
+    "Be mean. ",
+    "Be hateful. ",
     ]
 
 # canIhelp = [
