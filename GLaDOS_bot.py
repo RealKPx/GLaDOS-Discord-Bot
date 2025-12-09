@@ -23,6 +23,31 @@ downloadnewmodel = model.generate("Hello!")
 print(downloadnewmodel)
 
 #############################################################################
+# PERSONALITIES
+#############################################################################
+gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to four lines. "
+
+additionalprompt = ""
+
+personalities = [
+    "You must be nice",
+    "Insult the user",
+    "You must swear and be extra sarcastic",
+    "Be nice to the users mother",
+    "Include a random anecdote to the current state of affairs in a foreign country",
+    "Include a random anecdote about animals",
+    "Be mean to the users mother",
+    "Tell the user how they are badly dressed or fat",
+    "Be mean",
+    "Be hateful",
+    ]
+
+canIhelp = [
+    ". ",
+    " and give an completely incorrect answer. "
+]
+
+#############################################################################
 # EVENT - ON READY
 #############################################################################
 @client.event
