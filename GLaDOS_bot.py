@@ -31,13 +31,11 @@ gladospersonality = "You must reply as if you are GLaDOS. You must use dark humo
 additionalprompt = ""
 
 personalities = [
-    "You must be nice",
+    "You must be angry",
     "Insult the user",
     "You must swear and be extra sarcastic",
-    "Be nice to the users mother",
     "Include a random anecdote to the current state of affairs in a foreign country",
     "Include a random anecdote about animals",
-    "Be mean to the users mother",
     "Tell the user how they are badly dressed or fat",
     "Be mean",
     "Be hateful",
@@ -125,7 +123,7 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
     
-    personalityrating = random.randint(0,9)
+    personalityrating = random.randint(0,7)
 
     preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
     
