@@ -41,10 +41,10 @@ personalities = [
     "Be hateful",
     ]
 
-canIhelp = [
-    ". ",
-    " and give an completely incorrect answer. "
-]
+# canIhelp = [
+#     ". ",
+#     " and give an completely incorrect answer. "
+# ]
 
 #############################################################################
 # EVENT - ON READY
@@ -125,8 +125,9 @@ async def GLaDOS(ctx, arg):
     
     personalityrating = random.randint(0,7)
 
-    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp) + arg
-    
+    #preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp) + arg
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + arg
+
     print(personalityrating)
     print(preprompt)
 
