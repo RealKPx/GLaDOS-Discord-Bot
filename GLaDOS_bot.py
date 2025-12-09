@@ -1,5 +1,6 @@
 import discord
 import subprocess
+import random
 from gpt4all import GPT4All
 from discord.ext import commands,tasks
 from time import sleep
@@ -123,11 +124,16 @@ async def gladostts(ctx, arg):
 #############################################################################
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
-    pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
-    print(pregpt)
     
+    personalityrating = random.randint(0,9)
+
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
+    
+    print(personalityrating)
+    print(preprompt)
+
     with model.chat_session():
-        gptoutput = model.generate(pregpt, temp=50)
+        gptoutput = model.generate(preprompt, temp=50)
         print(gptoutput)
 
     texttospeak = "-t" + gptoutput
