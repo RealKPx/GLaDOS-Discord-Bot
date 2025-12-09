@@ -57,7 +57,7 @@ async def on_ready():
 #############################################################################
 # EVENT - 30 MIN CHAT
 #############################################################################
-@tasks.loop(minutes=30)
+@tasks.loop(minutes=1)
 async def randomchat(ctx):
    
     response = AI.responses.create(
