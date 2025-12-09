@@ -32,7 +32,7 @@ gladospersonality = "You must reply as if you are GLaDOS. You must use dark humo
 additionalprompt = ""
 
 personalities = [
-    "You must be nice",
+    "You must be rude",
     "Insult the user",
     "You must swear and be extra sarcastic",
     "Include a random anecdote to the current state of affairs in a foreign country",
@@ -53,6 +53,20 @@ canIhelp = [
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
+
+#############################################################################
+# EVENT - 30 MIN CHAT
+#############################################################################
+@tasks.loop(minutes=30)
+async def randomchat(ctx):
+   
+    response = AI.responses.create(
+        model="gpt-5-mini",
+        instructions="You must create a one line prompt for an AI. ",
+        input="Come up with a random subject",
+    )
+
+    GLaDOS(ctx, response.output_text)
 
 #############################################################################
 # EVENT - JOIN COMMAND
@@ -95,6 +109,16 @@ async def ping(ctx):
     await ctx.send("Pong")
 
 #############################################################################
+# EVENT - TEST COMMAND
+#############################################################################
+@client.command(name="test")
+async def test(ctx):
+    print("testing 30 min")
+    await ctx.send("testing 30 min")
+
+    randomchat(ctx)
+
+#############################################################################
 # EVENT - TTS COMMAND
 #############################################################################
 @client.command(name="gladostts")
@@ -118,6 +142,7 @@ async def gladostts(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player =  voice.play(source)
+        await ctx.send(arg)
 
 #############################################################################
 # EVENT - GLaDOS COMMAND
@@ -145,27 +170,7 @@ async def GLaDOS(ctx, arg):
         input=arg,
     )
 
-    texttospeak = "-t" + response.output_text
-    subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
-
-    if isinstance(ctx.channel, discord.channel.DMChannel):
-        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
-    if not ctx.author.voice:
-        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
-    channel = ctx.author.voice.channel
-    if not channel:
-        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if not voice:
-        await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
-    if voice and voice.is_playing():
-        return await ctx.send("Please wait until I am finished before using another voice channel command.")
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
-        player = voice.play(source)
-        await ctx.send(response.output_text)
-
+    gladostts(ctx, response.output_text)
 
 #############################################################################
 # RUN BOT
