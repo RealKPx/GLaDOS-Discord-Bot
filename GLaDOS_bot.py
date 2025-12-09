@@ -125,13 +125,13 @@ async def GLaDOS(ctx, arg):
     
     personalityrating = random.randint(0,7)
 
-    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp) + arg
     
     print(personalityrating)
     print(preprompt)
 
     with model.chat_session():
-        gptoutput = model.generate(preprompt, temp=50)
+        gptoutput = model.generate(preprompt)
         print(gptoutput)
 
     texttospeak = "-t" + gptoutput
