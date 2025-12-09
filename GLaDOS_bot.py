@@ -27,7 +27,7 @@ AI = OpenAI(
 #############################################################################
 # PERSONALITIES
 #############################################################################
-gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. "
+gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. Do not give real-life advice. "
 
 additionalprompt = "Our mission is to build aperture laboratories for you. "
 
@@ -35,10 +35,8 @@ personalities = [
     "You must be nice",
     "Insult the user",
     "You must swear and be extra sarcastic",
-    "Be nice to the users mother",
     "Include a random anecdote to the current state of affairs in a foreign country",
     "Include a random anecdote about an animal",
-    "Be mean to the users mother",
     "Tell the user how they are badly dressed or fat",
     "Be mean",
     "Be hateful",
@@ -134,7 +132,7 @@ async def GLaDOS(ctx, arg):
     # else:
     #     personalityrating + random.choice([-1, 1])
     
-    personalityrating = random.randint(0,9)
+    personalityrating = random.randint(0,7)
 
     preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
     
