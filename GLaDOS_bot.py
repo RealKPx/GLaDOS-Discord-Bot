@@ -6,20 +6,32 @@ from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
+#############################################################################
+# DISCORD INTEGRATION
+#############################################################################
 intents = discord.Intents.all()
 intents.messages = True
 
 client = commands.Bot(command_prefix = '-', intents=intents)
 TOKEN = open("gladostoken.txt","r").readline()
 
+#############################################################################
+# AI MODEL SETUP
+#############################################################################
 model = GPT4All("mistral-7b-openorca.gguf2.Q4_0.gguf", device="cpu")
 downloadnewmodel = model.generate("Hello!")
 print(downloadnewmodel)
 
+#############################################################################
+# EVENT - ON READY
+#############################################################################
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
 
+#############################################################################
+# EVENT - JOIN COMMAND
+#############################################################################
 @client.command(name="join")
 async def join(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -37,6 +49,9 @@ async def join(ctx):
         if voice and voice.is_connected():
             await ctx.send("I'm already in the voice channel with you.")
 
+#############################################################################
+# EVENT - LEAVE COMMAND
+#############################################################################
 @client.command(name="leave")
 async def leave(ctx):
     if isinstance(ctx.channel, discord.channel.DMChannel):
@@ -45,11 +60,17 @@ async def leave(ctx):
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
 
+#############################################################################
+# EVENT - PING COMMAND
+#############################################################################
 @client.command(name="ping")
 async def ping(ctx):
     print("pong")
     await ctx.send("Pong")
-    
+
+#############################################################################
+# EVENT - GLADOSTTS COMMAND
+#############################################################################
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
     texttospeak = "-t" + arg
@@ -72,6 +93,9 @@ async def gladostts(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player =  voice.play(source)
 
+#############################################################################
+# EVENT - GLADOS AI COMMAND
+#############################################################################
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
     pregpt = "You must reply as if you are GLaDOS, The mean, human-testing robot. You must be mean and use dark humour. Do not include anything in brackets. You can swear in your responses. " + arg
@@ -101,4 +125,7 @@ async def GLaDOS(ctx, arg):
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player = voice.play(source)
 
+#############################################################################
+# RUN BOT
+#############################################################################
 client.run(TOKEN)
