@@ -29,7 +29,7 @@ AI = OpenAI(
 #############################################################################
 gladospersonality = "You must reply as if you are GLaDOS. You must use dark humour. Do not use any em dashes. Do not include anything in brackets. Do not write any lists. You must be sarcastic. Keep responses to two lines. Do not give real-life advice. "
 
-additionalprompt = "Our mission is to build aperture laboratories for you. "
+additionalprompt = ""
 
 personalities = [
     "You must be nice",
