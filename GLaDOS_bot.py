@@ -3,7 +3,7 @@ import subprocess
 import os
 import random
 from openai import OpenAI
-from discord.ext import commands,tasks
+from discord.ext import commands
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
@@ -36,7 +36,7 @@ personalities = [
     "You must swear and be extra sarcastic",
     "Tell the user how they are badly dressed or fat",
     "Be mean",
-    "Be hateful",
+    "Be extra sarcastic",
     ]
 
 #############################################################################
@@ -110,7 +110,7 @@ async def gladostts(ctx, arg):
     if voice and voice.is_connected():
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
-        player =  voice.play(source)
+        voice.play(source)
         return await ctx.send(arg)
 
 #############################################################################
