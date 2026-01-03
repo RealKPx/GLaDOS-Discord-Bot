@@ -3,8 +3,7 @@ import subprocess
 import os
 import random
 from openai import OpenAI
-from discord.ext import commands,tasks
-from time import sleep
+from discord.ext import commands
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
@@ -32,20 +31,13 @@ gladospersonality = "You must reply as if you are GLaDOS. You must use dark humo
 additionalprompt = ""
 
 personalities = [
-    "You must be nice",
+    "You must be rude",
     "Insult the user",
     "You must swear and be extra sarcastic",
-    "Include a random anecdote to the current state of affairs in a foreign country",
-    "Include a random anecdote about an animal",
     "Tell the user how they are badly dressed or fat",
     "Be mean",
-    "Be hateful",
+    "Be extra sarcastic",
     ]
-
-canIhelp = [
-    ". ",
-    " and give an completely incorrect answer. "
-]
 
 #############################################################################
 # EVENT - STARTUP
@@ -69,6 +61,7 @@ async def join(ctx):
         await voice.move_to(channel)
     else:
         await channel.connect()
+        await GLaDOS(ctx, "Hello GLaDOS")
     client_channel = ctx.voice_client.channel
     if channel and channel == client_channel:
         if voice and voice.is_connected():
@@ -117,7 +110,8 @@ async def gladostts(ctx, arg):
     if voice and voice.is_connected():
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
-        player =  voice.play(source)
+        voice.play(source)
+        return await ctx.send(arg)
 
 #############################################################################
 # EVENT - GLaDOS COMMAND
@@ -125,16 +119,9 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
-    # if personalityrating == 0:
-    #     personalityrating = 1
-    # elif personalityrating == 9:
-    #     personalityrating = 8
-    # else:
-    #     personalityrating + random.choice([-1, 1])
-    
-    personalityrating = random.randint(0,7)
+    personalityrating = random.randint(0,5)
 
-    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating]
     
     print(personalityrating)
     print(preprompt)
@@ -145,27 +132,7 @@ async def GLaDOS(ctx, arg):
         input=arg,
     )
 
-    texttospeak = "-t" + response.output_text
-    subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
-
-    if isinstance(ctx.channel, discord.channel.DMChannel):
-        return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
-    if not ctx.author.voice:
-        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
-    channel = ctx.author.voice.channel
-    if not channel:
-        return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if not voice:
-        await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
-    if voice and voice.is_playing():
-        return await ctx.send("Please wait until I am finished before using another voice channel command.")
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
-        player = voice.play(source)
-        await ctx.send(response.output_text)
-
+    await gladostts(ctx, response.output_text)
 
 #############################################################################
 # RUN BOT
