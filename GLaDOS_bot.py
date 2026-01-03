@@ -4,7 +4,6 @@ import os
 import random
 from openai import OpenAI
 from discord.ext import commands,tasks
-from time import sleep
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
@@ -35,8 +34,6 @@ personalities = [
     "You must be rude",
     "Insult the user",
     "You must swear and be extra sarcastic",
-    "Include a random anecdote to the current state of affairs in a foreign country",
-    "Include a random anecdote about an animal",
     "Tell the user how they are badly dressed or fat",
     "Be mean",
     "Be hateful",
@@ -53,20 +50,6 @@ canIhelp = [
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="With test subjects"))
-
-#############################################################################
-# EVENT - 30 MIN CHAT
-#############################################################################
-@tasks.loop(minutes=1)
-async def randomchat(ctx):
-   
-    response = AI.responses.create(
-        model="gpt-5-mini",
-        instructions="You must create a one line prompt for an AI. ",
-        input="Come up with a random subject",
-    )
-
-    GLaDOS(ctx, response.output_text)
 
 #############################################################################
 # EVENT - JOIN COMMAND
@@ -109,16 +92,6 @@ async def ping(ctx):
     await ctx.send("Pong")
 
 #############################################################################
-# EVENT - TEST COMMAND
-#############################################################################
-@client.command(name="test")
-async def test(ctx):
-    print("testing 30 min")
-    await ctx.send("testing 30 min")
-
-    randomchat(ctx)
-
-#############################################################################
 # EVENT - TTS COMMAND
 #############################################################################
 @client.command(name="gladostts")
@@ -142,7 +115,7 @@ async def gladostts(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         player =  voice.play(source)
-        await ctx.send(arg)
+        return await ctx.send(arg)
 
 #############################################################################
 # EVENT - GLaDOS COMMAND
@@ -150,14 +123,7 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
-    # if personalityrating == 0:
-    #     personalityrating = 1
-    # elif personalityrating == 9:
-    #     personalityrating = 8
-    # else:
-    #     personalityrating + random.choice([-1, 1])
-    
-    personalityrating = random.randint(0,7)
+    personalityrating = random.randint(0,5)
 
     preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
     
@@ -170,7 +136,7 @@ async def GLaDOS(ctx, arg):
         input=arg,
     )
 
-    gladostts(ctx, response.output_text)
+    await gladostts(ctx, response.output_text)
 
 #############################################################################
 # RUN BOT
