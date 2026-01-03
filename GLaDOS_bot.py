@@ -39,11 +39,6 @@ personalities = [
     "Be hateful",
     ]
 
-canIhelp = [
-    ". ",
-    " and give an completely incorrect answer. "
-]
-
 #############################################################################
 # EVENT - STARTUP
 #############################################################################
@@ -66,6 +61,7 @@ async def join(ctx):
         await voice.move_to(channel)
     else:
         await channel.connect()
+        await GLaDOS(ctx, "Hello GLaDOS")
     client_channel = ctx.voice_client.channel
     if channel and channel == client_channel:
         if voice and voice.is_connected():
@@ -125,7 +121,7 @@ async def GLaDOS(ctx, arg):
 
     personalityrating = random.randint(0,5)
 
-    preprompt = gladospersonality + additionalprompt + personalities[personalityrating] + random.choice(canIhelp)
+    preprompt = gladospersonality + additionalprompt + personalities[personalityrating]
     
     print(personalityrating)
     print(preprompt)
