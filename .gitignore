@@ -3,3 +3,6 @@ speak_console.exe
 speak.exe
 SPEAKTEXT.wav
 apikey.txt
+rconpassword.txt
+hostip.txt
+hostport.txt
