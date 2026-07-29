@@ -6,7 +6,6 @@ from openai import OpenAI
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 from discord.utils import get
-from mcrcon import MCRcon
 
 #############################################################################
 # DISCORD INTEGRATION
@@ -21,21 +20,8 @@ TOKEN = open("gladostoken.txt","r").readline()
 # OPENAI INTEGRATION
 #############################################################################
 AI = OpenAI(
-    api_key = open("apikey.txt", "r").readline(),
+    api_key=open("apikey.txt", "r").readline(),
 )
-
-#############################################################################
-# MINECRAFT SERVER INTEGRATION
-#############################################################################
-HOST = open("hostip.txt","r").readline()
-PASSWORD = open("rconpassword.txt","r").readline()
-PORT = open("hostport.txt","r").readline()
-
-async def send_minecraft_command(command):
-    with MCRcon(HOST, PASSWORD) as mcr:
-        response = mcr.command(command)
-        print("Server response:" + {response})
-
 
 #############################################################################
 # PERSONALITIES
@@ -125,8 +111,7 @@ async def gladostts(ctx, arg):
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
         voice.play(source)
-        await ctx.send(arg)
-        await send_minecraft_command("say " + arg)
+        return await ctx.send(arg)
 
 #############################################################################
 # EVENT - GLaDOS COMMAND
