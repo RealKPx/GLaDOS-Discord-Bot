@@ -4,6 +4,7 @@ import os
 import random
 from openai import OpenAI
 from discord.ext import commands
+# from discord.ext import tasks
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
@@ -99,9 +100,11 @@ async def gladostts(ctx, arg):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
     if not ctx.author.voice:
         return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    
     channel = ctx.author.voice.channel
     if not channel:
         return await ctx.send("Did you really think that would work if you weren't connected to a voice channel?")
+    
     voice = get(client.voice_clients, guild=ctx.guild)
     if not voice:
         await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
@@ -119,7 +122,7 @@ async def gladostts(ctx, arg):
 @client.command(name="GLaDOS")
 async def GLaDOS(ctx, arg):
 
-    personalityrating = random.randint(0,5)
+    personalityrating = random.randint(0,personalities.__len__()-1)
 
     preprompt = gladospersonality + additionalprompt + personalities[personalityrating]
     
@@ -133,6 +136,22 @@ async def GLaDOS(ctx, arg):
     )
 
     await gladostts(ctx, response.output_text)
+
+# #############################################################################
+# # EVENT - RANDOM GLaDOS CHATTER
+# #############################################################################
+# async def random_glados(ctx):
+    
+#     response = AI.responses.create(
+#         model="gpt-5.4-mini",
+#         instructions="You are to create preprompts for a GLaDOS Discord bot. You must create a random topic to discuss with the user. Keep it to one line. Do not include any lists.",
+#         input="Come up with a random topic to discuss with the user",
+#     )
+
+#     print(response.output_text)
+
+#     await GLaDOS(ctx, response.output_text)
+
 
 #############################################################################
 # RUN BOT
