@@ -106,7 +106,7 @@ async def gladostts(ctx, arg):
     if not voice:
         await ctx.send("Did you really think that would work if I wasn't connected to a voice channel?")
     if voice and voice.is_playing():
-        return await ctx.send("Please wait until I am finished before using another voice channel command.")
+        return await ctx.send("Please wait until I have finished speaking before speaking to me again. I have a very busy schedule, you know.")
     if voice and voice.is_connected():
         await voice.move_to(channel)
         source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
