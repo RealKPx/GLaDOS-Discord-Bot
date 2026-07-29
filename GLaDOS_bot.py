@@ -14,13 +14,13 @@ intents = discord.Intents.all()
 intents.messages = True
 
 client = commands.Bot(command_prefix = '-', intents=intents)
-TOKEN = open("gladostoken.txt","r").readline()
+TOKEN = open("y:/GitHub/GLaDOS-Discord-Bot/gladostoken.txt","r").readline()
 
 #############################################################################
 # OPENAI INTEGRATION
 #############################################################################
 AI = OpenAI(
-    api_key=open("apikey.txt", "r").readline(),
+    api_key=open("y:/GitHub/GLaDOS-Discord-Bot/apikey.txt", "r").readline(),
 )
 
 #############################################################################
@@ -77,7 +77,7 @@ async def leave(ctx):
     if not ctx.message.guild.voice_client:
        return await ctx.send("I'm not currently connected to any voice channels.", delete_after = 5.0)
     await ctx.voice_client.disconnect()
-    os.remove("SPEAKTEXT.wav")
+    os.remove("y:/GitHub/GLaDOS-Discord-Bot/SPEAKTEXT.wav")
 
 #############################################################################
 # EVENT - PING COMMAND
@@ -93,7 +93,7 @@ async def ping(ctx):
 @client.command(name="gladostts")
 async def gladostts(ctx, arg):
     texttospeak = "-t" + arg
-    subprocess.run([r'speak.exe', texttospeak, "-oSPEAKTEXT.wav", "-q"])
+    subprocess.run([r'y:/GitHub/GLaDOS-Discord-Bot/speak.exe', texttospeak, "-oy:/GitHub/GLaDOS-Discord-Bot/SPEAKTEXT.wav", "-q"])
 
     if isinstance(ctx.channel, discord.channel.DMChannel):
         return await ctx.send("Please return to the Aperture Science computer-aided enrichment center.")
@@ -109,7 +109,7 @@ async def gladostts(ctx, arg):
         return await ctx.send("Please wait until I have finished speaking before speaking to me again. I have a very busy schedule, you know.")
     if voice and voice.is_connected():
         await voice.move_to(channel)
-        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'SPEAKTEXT.wav')
+        source = FFmpegPCMAudio(executable="C:/ffmpeg/bin/ffmpeg.exe", source = 'y:/GitHub/GLaDOS-Discord-Bot/SPEAKTEXT.wav')
         voice.play(source)
         return await ctx.send(arg)
 
