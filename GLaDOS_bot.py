@@ -127,7 +127,7 @@ async def GLaDOS(ctx, arg):
     print(preprompt)
 
     response = AI.responses.create(
-        model="gpt-5-mini",
+        model="gpt-5.4-mini",
         instructions=preprompt,
         input=arg,
     )
